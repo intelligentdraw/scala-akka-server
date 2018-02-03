@@ -8,3 +8,6 @@ target
 /.project
 /.settings
 /RUNNING_PID
+public/javascripts/*.map
+public/javascripts/*.js
+public javascripts/glyphicons*
