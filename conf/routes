@@ -16,11 +16,13 @@ GET   /                          controllers.BootstrapController.index
 
 GET   /id                          controllers.BootstrapController.index
 
-GET   /id/new                          controllers.BootstrapController.index
-
 GET     /id/*path          controllers.BootstrapController.index2(path)
 
-
-#GET     /id/:path1/:path2          controllers.BootstrapController.index3(path1, path2)
-
 GET /drawings controllers.DrawingController.getDrawings
+
+GET /drawing/:id controllers.DrawingController.getDrawing(id)
+
+GET /drawing/metadata/:id controllers.DrawingController.getDrawingMetadata(id)
+
+
+GET /image/:id controllers.DrawingController.getImage(id)

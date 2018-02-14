@@ -11,10 +11,15 @@ import play.api.mvc._
 @Singleton
 class BootstrapController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  def index = Assets.at( "/public/javascripts", "index.html")
+  def index = Assets.at("index.html")
 
-  def index2(file: String) = Assets.at("/public/javascripts/", file)
+  def index2(file: String) = {
+    if (!file.contains("."))
+      Assets.at("index.html")
+    else
+      Assets.at( file)
+  }
 
-  def index3(path1: String, path2: String) = Assets.at("/public/javascripts/" + path1, path2)
+  def index3(file: String) = Assets.at("index.html")
 
 }
