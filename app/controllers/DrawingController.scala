@@ -5,6 +5,7 @@ import java.awt.geom.Arc2D
 import java.io.ByteArrayOutputStream
 import javax.inject.{Inject, Singleton}
 
+import helpers.GraphicsHelper
 import models.Drawing
 import models.DrawingMetadata
 import models.UsecaseDiagram
@@ -37,19 +38,14 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
 
     import java.awt.Graphics2D
     import java.awt.image.BufferedImage
-    val image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_BGR)
+    val image = new BufferedImage(500, 500, BufferedImage.TYPE_INT_BGR)
     val graphic2D = image.createGraphics
 
-    val color = Color.decode("#ffffff")
-    graphic2D.setPaint(color)
-    //graphic2D.fillArc(0, 0, 50, 50, 0, 45)
-    //graphic2D.fillArc(0, 0, 50, 50, 135, 45)
 
-    graphic2D.draw(new Arc2D.Double(10, 10,
-      50,
-      50,
-      90, 135,
-      Arc2D.OPEN))
+    GraphicsHelper.createUsecaseActor(graphic2D, 50, 200, 25, "Defactor power seen")
+
+    //val color = Color.decode("#ffffff")
+    //graphic2D.setPaint(color)
 
     val baos = new ByteArrayOutputStream()
     import javax.imageio.ImageIO
