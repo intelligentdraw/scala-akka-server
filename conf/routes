@@ -25,4 +25,4 @@ GET /drawing/:id controllers.DrawingController.getDrawing(id)
 GET /drawing/metadata/:id controllers.DrawingController.getDrawingMetadata(id)
 
 
-GET /image/:id controllers.DrawingController.getImage(id)
+GET /image/:id controllers.DrawingController.getUsecaseDiagramImageBinary(id)

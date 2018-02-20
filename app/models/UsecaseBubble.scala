@@ -1,3 +1,3 @@
 package models
 
-case class UsecaseBubble(desc:String, location: Location)
+case class UsecaseBubble(desc:String)

@@ -1,14 +1,12 @@
 package controllers
 
-import java.awt.Color
+import java.awt.{Color, Graphics2D}
 import java.awt.geom.Arc2D
 import java.io.ByteArrayOutputStream
 import javax.inject.{Inject, Singleton}
 
 import helpers.GraphicsHelper
-import models.Drawing
-import models.DrawingMetadata
-import models.UsecaseDiagram
+import models._
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
 import play.api.mvc._
@@ -16,40 +14,72 @@ import play.api.mvc._
 @Singleton
 class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractController(cc){
 
+  var usecaseDiagrams = UsecaseDiagrams.createForTesting();
+
   def getDrawings = Action{
     val drawings = Drawing.findAll
     Ok(Json.toJson(drawings))
   }
 
   def getDrawing(id: String) = Action{
-    val drawing = Drawing find id
+    val drawing = Drawing.findAll
     Ok(Json.toJson(drawing))
   }
 
   def getDrawingMetadata(id: String) = Action{
-    val drawing:DrawingMetadata = DrawingMetadata.find(id)
+    val drawing = Drawing.findAll
+   // val drawing:DrawingMetadata = DrawingMetadata.find(id)
     Ok(Json.toJson(drawing))
   }
 
-  def getImage(id: String) = Action{
+  /**
+    * Get the binary for the use case diagram
+    * @param id
+    * @return
+    */
+  def getUsecaseDiagramImageBinary(id: String) = Action{
 
-    val drawingMetadata:DrawingMetadata = DrawingMetadata.find("kj34kjwfw1")
-    val usecaseDiag:UsecaseDiagram = drawingMetadata.usecaseDiag
+    val usecaseDiag:UsecaseDiagram = usecaseDiagrams.usecaseDiags(id)
 
-    import java.awt.Graphics2D
-    import java.awt.image.BufferedImage
-    val image = new BufferedImage(500, 500, BufferedImage.TYPE_INT_BGR)
-    val graphic2D = image.createGraphics
+    val imageAndGraphic2D = GraphicsHelper.drawDiagramPanel(usecaseDiag)
+
+    val actorLocations = Location.createActorLocation(usecaseDiag)
+
+    val bubbleLocations = Location.createBubbleLocations(usecaseDiag)
+
+    actorLocations.foreach(actorLocation =>{
+      GraphicsHelper.createUsecaseActor(imageAndGraphic2D._2, actorLocation.left, actorLocation.top, actorLocation.desc)
+    } )
 
 
-    GraphicsHelper.createUsecaseActor(graphic2D, 50, 200, 25, "Defactor power seen")
+    bubbleLocations.foreach(location => {
+        GraphicsHelper.createUsecaseBubble(imageAndGraphic2D._2, location.left, location.top, location.desc)
+      }
+    )
 
-    //val color = Color.decode("#ffffff")
-    //graphic2D.setPaint(color)
+    //link the actors to their own bubbles
+    actorLocations.foreach(actorLocation=>{
+        usecaseDiag.actorsAndUsecases.keys.foreach(actor=>
+          if (actorLocation.desc.equals(actor.name)){
+            usecaseDiag.actorsAndUsecases(actor).foreach(bubble => {
+              bubbleLocations.foreach(bubbleLocation => {
+                if (bubble.desc.equals(bubbleLocation.desc)){
+                  GraphicsHelper.linkActorToUsecase(imageAndGraphic2D._2, actorLocation, bubbleLocation)
+                }
+              })
+            })
+          }
+        )
+      }
+    )
+
+
+
+
 
     val baos = new ByteArrayOutputStream()
     import javax.imageio.ImageIO
-    ImageIO.write(image, "png", baos)
+    ImageIO.write(imageAndGraphic2D._1, "png", baos)
 
 
     baos.flush
@@ -61,7 +91,6 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
     val MimeType = "image/png"
     try{
 
-      //val imageData: Array[Byte] = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("moses.png"))
       Ok(imageInByte).as(MimeType)
 
     } catch {
