@@ -11,6 +11,8 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
 import play.api.mvc._
 
+import scala.collection.mutable.ListBuffer
+
 @Singleton
 class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractController(cc){
 
@@ -18,18 +20,58 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
 
   def getDrawings = Action{
     val drawings = Drawing.findAll
+    print("testing33333")
     Ok(Json.toJson(drawings))
   }
 
   def getDrawing(id: String) = Action{
     val drawing = Drawing.findAll
+    print("testing2222")
     Ok(Json.toJson(drawing))
   }
 
+  /**
+    * Get Drawing Metadata
+    * @param id
+    * @return
+    */
   def getDrawingMetadata(id: String) = Action{
-    val drawing = Drawing.findAll
-   // val drawing:DrawingMetadata = DrawingMetadata.find(id)
-    Ok(Json.toJson(drawing))
+
+    val usecaseDiag = usecaseDiagrams.usecaseDiags(id)
+    val actorLocations = Location.createActorLocation(usecaseDiag)
+    val bubbleLoactions = Location.createBubbleLocations(usecaseDiag)
+
+
+    val usecaseElements = new ListBuffer[Map[String,String]]()
+
+
+    actorLocations.foreach(actorLocation =>{
+      val left = actorLocation.left - (ActorProperties.HEAD_RADIUS.getValue * 2)
+      val top  = actorLocation.top  - (ActorProperties.HEAD_RADIUS.getValue * 2)
+      val right = actorLocation.left + (ActorProperties.HEAD_RADIUS.getValue * 2)
+      val bottom = actorLocation.top + (ActorProperties.HEAD_RADIUS.getValue * 4)
+      val coords = String.valueOf(left) + ", " + String.valueOf(top) + ", " + String.valueOf(right) + ", " + String.valueOf(bottom)
+      val metadataMap = new scala.collection.mutable.HashMap[String, String]()
+      usecaseElements += Map(
+        "name" -> actorLocation.desc,
+        "coords"->coords,
+        "shape" ->"rect")
+    })
+
+    bubbleLoactions.foreach(bubbleLocation=>{
+      val left = bubbleLocation.left
+      val top = bubbleLocation.top
+      val right = bubbleLocation.left + BubbleProperties.WIDTH.getValue
+      val bottom = bubbleLocation.top + BubbleProperties.HEIGHT.getValue
+      val metadataMap = new scala.collection.mutable.HashMap[String, String]()
+      val coords = String.valueOf(left) + ", " + String.valueOf(top) + ", " + String.valueOf(right) + ", " + String.valueOf(bottom)
+      usecaseElements += Map(
+        "name" -> bubbleLocation.desc,
+        "coords"->coords,
+        "shape" ->"rect")
+    })
+
+    Ok(Json.toJson(usecaseElements))
   }
 
   /**

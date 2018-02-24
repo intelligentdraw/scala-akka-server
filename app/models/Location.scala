@@ -1,5 +1,7 @@
 package models
 
+import models.Location.getDiagramWidth
+
 import scala.collection.mutable.ListBuffer
 
 case class Location(desc:String, left: Int, top: Int)
@@ -31,7 +33,7 @@ object Location{
     * Get the width of the diagram panel
     * @return
     */
-  def getDiagramWidth = 500
+  def getDiagramWidth = DiagramProperties.WIDTH.getValue
 
   /**
     * Create the locations of the usecases (bubbles)
@@ -49,7 +51,9 @@ object Location{
     val locations = new scala.collection.mutable.LinkedHashSet[Location]()
     var yMilestone: Int = 0
     all.foreach(bubble =>{
-      locations += Location(bubble.desc, 300, yMilestone)
+      val fraction = 0.6:BigDecimal
+      val x =   fraction * getDiagramWidth
+      locations += Location(bubble.desc, x.intValue(), yMilestone)
       yMilestone +=  BubbleProperties.HEIGHT.getValue
     })
     locations
