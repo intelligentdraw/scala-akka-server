@@ -1,7 +1,8 @@
 package models;
 
 public enum DiagramProperties {
-    WIDTH(500);
+    SHORT_WIDTH(500),
+    LONG_WIDTH(750);
 
     private int value;
 

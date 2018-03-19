@@ -20,13 +20,11 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
 
   def getDrawings = Action{
     val drawings = Drawing.findAll
-    print("testing33333")
     Ok(Json.toJson(drawings))
   }
 
   def getDrawing(id: String) = Action{
     val drawing = Drawing.findAll
-    print("testing2222")
     Ok(Json.toJson(drawing))
   }
 
@@ -40,6 +38,7 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
     val usecaseDiag = usecaseDiagrams.usecaseDiags(id)
     val actorLocations = Location.createActorLocation(usecaseDiag)
     val bubbleLoactions = Location.createBubbleLocations(usecaseDiag)
+    val includeLocations = Location.createIncludeLocations(usecaseDiag)
 
 
     val usecaseElements = new ListBuffer[Map[String,String]]()
@@ -63,10 +62,22 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
       val top = bubbleLocation.top
       val right = bubbleLocation.left + BubbleProperties.WIDTH.getValue
       val bottom = bubbleLocation.top + BubbleProperties.HEIGHT.getValue
-      val metadataMap = new scala.collection.mutable.HashMap[String, String]()
       val coords = String.valueOf(left) + ", " + String.valueOf(top) + ", " + String.valueOf(right) + ", " + String.valueOf(bottom)
       usecaseElements += Map(
         "name" -> bubbleLocation.desc,
+        "coords"->coords,
+        "shape" ->"rect")
+    })
+
+
+    includeLocations.foreach(includeLocation=>{
+      val left = includeLocation.left
+      val top = includeLocation.top
+      val right = includeLocation.left + BubbleProperties.WIDTH.getValue
+      val bottom = includeLocation.top + BubbleProperties.HEIGHT.getValue
+      val coords = String.valueOf(left) + ", " + String.valueOf(top) + ", " + String.valueOf(right) + ", " + String.valueOf(bottom)
+      usecaseElements += Map(
+        "name" -> includeLocation.desc,
         "coords"->coords,
         "shape" ->"rect")
     })
@@ -82,22 +93,28 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
   def getUsecaseDiagramImageBinary(id: String) = Action{
 
     val usecaseDiag:UsecaseDiagram = usecaseDiagrams.usecaseDiags(id)
-
     val imageAndGraphic2D = GraphicsHelper.drawDiagramPanel(usecaseDiag)
-
     val actorLocations = Location.createActorLocation(usecaseDiag)
-
     val bubbleLocations = Location.createBubbleLocations(usecaseDiag)
+    val includeLocations = Location.createIncludeLocations(usecaseDiag)
 
+    GraphicsHelper.writeDiagTitle(imageAndGraphic2D._2, usecaseDiag)
+
+    //draw the usecase actor
     actorLocations.foreach(actorLocation =>{
       GraphicsHelper.createUsecaseActor(imageAndGraphic2D._2, actorLocation.left, actorLocation.top, actorLocation.desc)
-    } )
+    })
 
 
+    //draw the usecase bubble
     bubbleLocations.foreach(location => {
         GraphicsHelper.createUsecaseBubble(imageAndGraphic2D._2, location.left, location.top, location.desc)
-      }
-    )
+      })
+
+    //Draw the includes
+    includeLocations.foreach(location => {
+      GraphicsHelper.createUsecaseBubble(imageAndGraphic2D._2, location.left, location.top, location.desc)
+    })
 
     //link the actors to their own bubbles
     actorLocations.foreach(actorLocation=>{
@@ -116,7 +133,22 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
     )
 
 
-
+    bubbleLocations.foreach(bubbleLocation =>{
+      usecaseDiag.actorsAndUsecases.values.foreach(set=>{
+        set.foreach(bubble=>{
+          //find the includes for the bubble
+          if (bubble.desc.equals(bubbleLocation.desc)) {
+            bubble.includes.foreach(include=>{
+              includeLocations.foreach(includeLocation => {
+                if (includeLocation.desc.equals(include.desc)){
+                  GraphicsHelper.linkUsecaseToInclude(imageAndGraphic2D._2, bubbleLocation, includeLocation)
+                }
+              })
+            })
+          }
+        })
+      })
+    })
 
 
     val baos = new ByteArrayOutputStream()
