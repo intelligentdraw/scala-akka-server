@@ -1,14 +1,16 @@
 package helpers
 
-import java.awt.{Color, Graphics2D}
+import java.awt.{BasicStroke, Color, Graphics2D}
 
 import models._
 
 object GraphicsHelper {
 
-
-
-
+  /**
+    *
+    * @param usecaseDiag
+    * @return
+    */
   def drawDiagramPanel(usecaseDiag:UsecaseDiagram) = {
 
 
@@ -36,11 +38,16 @@ object GraphicsHelper {
   }
 
   def writeDiagTitle(graphics2D: Graphics2D, usecaseDiag:UsecaseDiagram): Unit ={
-    val metrics = graphics2D.getFontMetrics
+
+    val g2d = graphics2D.create.asInstanceOf[Graphics2D]
+    import java.awt.Font
+    g2d.setFont(new Font("default", Font.BOLD, 12))
+
+    val metrics = g2d.getFontMetrics
     val messageWidth = metrics.stringWidth(usecaseDiag.title)
 
     //message
-    graphics2D.drawString(usecaseDiag.title, 10, 15)
+    g2d.drawString(usecaseDiag.title, 10, 15)
 
     //bottom line
     graphics2D.drawLine(0, 20, messageWidth+10, 20)
@@ -50,6 +57,8 @@ object GraphicsHelper {
 
     //diagonal line to join bottom and side
     graphics2D.drawLine(messageWidth+10, 20, messageWidth+20, 10)
+
+    g2d.dispose()
   }
 
   def createUsecaseActor(graphic2D: Graphics2D, x: Int, y:Int,  desc: String): Unit ={
@@ -91,11 +100,14 @@ object GraphicsHelper {
     graphic2D.drawLine( x, y + 3 * radius, x+radius, y+ 4 * radius)
 
     //desc
+    val g2d = graphic2D.create.asInstanceOf[Graphics2D]
+    import java.awt.Font
+    g2d.setFont(new Font("default", Font.BOLD, 11))
     var wordLevel: Int = 4
     desc.split("\\W+").foreach(
       word => {
         wordLevel +=1;
-        graphic2D.drawString(word, x- radius, y+wordLevel*radius)
+        g2d.drawString(word, x- radius, y+wordLevel*radius)
       }
     )
   }
@@ -114,8 +126,6 @@ object GraphicsHelper {
 
 
   def linkUsecaseToInclude(graphic2D: Graphics2D, bubble: Location, include: Location)={
-
-
     val width= BubbleProperties.WIDTH.getValue
     val height= BubbleProperties.HEIGHT.getValue
     val margin = BubbleProperties.MARGIN.getValue
@@ -142,42 +152,70 @@ object GraphicsHelper {
     * @param y2 of the line
     */
   private def createArrow(graphics2D: Graphics2D, x1:Int, y1:Int, x2:Int, y2:Int): Unit ={
+    val g2d = graphics2D.create.asInstanceOf[Graphics2D]
+    g2d.setStroke(new BasicStroke(1.5F))
     val x = x2 - x1
     val y = y2 - y1
     println("x: " + x)
     println("y: " + y)
 
-    //angle of the linking line between the usecase and include-usecase AND the adjacent X axis
-    val currentAngle = scala.math.toDegrees(scala.math.atan(y/x))
-    println("currentAngle:: " + currentAngle)
+    if (y  > 0) {
 
-    //arrow angle from line
-    val arrowAngleBottomSide = currentAngle/2
-    println("arrowAngleBottomSide: " + arrowAngleBottomSide)
+      val currentAngleInDecimal = scala.math.BigDecimal(y) / scala.math.BigDecimal(x)
+      val currentAngle = scala.math.toDegrees(scala.math.atan(currentAngleInDecimal.toFloat))
 
-    //arrow x
-    val arrowX = x/10
-    println("arrowX: " + arrowX)
-    //arrow y
-    val arrowY = scala.math.atan(scala.math.toRadians(arrowAngleBottomSide)) * arrowX
-    println("arrowY: " + arrowY)
+      //arrow angle from line
+      val arrowAngleBottomSide = currentAngle / 2
 
-    //draw the bottom side of arrow
-    graphics2D.drawLine(x2 - arrowX, y2 - arrowY.intValue(), x2, y2)
+      //arrow x
+      val arrowX = scala.math.BigDecimal(x) / scala.math.BigDecimal(10)
+      //arrow y
+      val arrowY = scala.math.tan(scala.math.toRadians(arrowAngleBottomSide)) * arrowX
+
+      //draw the bottom side of arrow
+      g2d.drawLine(x2 - arrowX.toInt, y2 - arrowY.intValue(), x2, y2)
 
 
+      val arrowAngleTopSide: scala.math.BigDecimal = currentAngle + arrowAngleBottomSide
 
-    //angle of the linking line and the Y axis
-    val currentAngleTopSide = (currentAngle - arrowAngleBottomSide)+currentAngle
-    val angleFromYaxis = 90 - currentAngleTopSide
-    println("angleFromYaxis: " + angleFromYaxis)
-    val arrowY2 = y/2
+      val arrowY2 = x2 - (x2 - arrowX.toInt)
+
+      val arrowX2 = arrowY2 / scala.math.tan(scala.math.toRadians(arrowAngleTopSide.toFloat))
+      g2d.drawLine(x2 - arrowX2.intValue(), y2 - arrowY2.intValue(), x2, y2)
+
+    }else{
+
+      val currentAngleInDecimal = scala.math.BigDecimal(x) / scala.math.BigDecimal(y)
+      val currentAngle = scala.math.toDegrees(scala.math.atan(currentAngleInDecimal.toFloat))
+      println("currentAngle2: " + currentAngle)
+
+      //arrow angle from line
+      val arrowAngleBottomSide = currentAngle / 2
+
+      //arrow x
+      val arrowX = scala.math.BigDecimal(x) / scala.math.BigDecimal(10)
+      //arrow y
+      val arrowY = scala.math.tan(scala.math.toRadians(arrowAngleBottomSide)) * arrowX
+      println("arrowY2: " + arrowY)
+
+      //draw the bottom side of arrow
+      g2d.drawLine(x2 - arrowX.toInt, y2 - arrowY.intValue(), x2, y2)
 
 
-    val arrowX2 = scala.math.atan(angleFromYaxis) * arrowY2
-    graphics2D.drawLine(x2 - arrowX2.intValue(), y2 - arrowY2.intValue(), x2, y2)
+      val arrowAngleTopSide: scala.math.BigDecimal = currentAngle + arrowAngleBottomSide
+      println("arrowAngleTopSide: " + arrowAngleTopSide.toFloat)
 
+      val arrowX2 = x2 - (x2 - arrowX.toInt)
+      println("arrowX2: " + arrowX2)
+
+      val arrowY2 = arrowX2 / scala.math.tan(scala.math.toRadians(arrowAngleTopSide.toFloat))
+      println("arrowX2: " + arrowX2)
+      g2d.drawLine(x2 - arrowX2.intValue(), y2 - arrowY2.intValue(), x2, y2)
+
+    }
+    g2d.dispose()
   }
+
 
   def createUsecaseBubble(graphics2D: Graphics2D, x: Int, y:Int, desc: String): Unit ={
     val width= BubbleProperties.WIDTH.getValue
@@ -193,7 +231,26 @@ object GraphicsHelper {
     graphics2D.setColor(Color.black)
 
     val metrics = graphics2D.getFontMetrics
-    val textX = (width - metrics.stringWidth(desc))/2
-    graphics2D.drawString(desc,x + textX, y+(height/2))
+    val stringWidth = metrics.stringWidth(desc)
+
+
+    val g2d = graphics2D.create.asInstanceOf[Graphics2D]
+    import java.awt.Font
+    g2d.setFont(new Font("default", Font.BOLD, 11))
+    if (stringWidth < width) {
+      val textX = (width - stringWidth) / 2
+      g2d.drawString(desc, x + textX, y + (height / 2))
+
+    }else{
+      val wordArr = desc.split("\\s")
+      //wrap
+      wordArr.foreach(word =>{
+        val stringWidth = metrics.stringWidth(word)
+        val textX = (width - stringWidth) / 2
+        var row = wordArr.indexOf(word) + 1
+        g2d.drawString(word,  x + textX, y + row * (height / (wordArr.length+1)))
+      })
+    }
+    g2d.dispose()
   }
 }

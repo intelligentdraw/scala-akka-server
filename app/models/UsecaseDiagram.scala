@@ -17,13 +17,13 @@ object UsecaseDiagrams{
     val usecaseBubble3 = UsecaseBubble("This is usecase 3", Set.empty)
     val usecaseBubble4 = UsecaseBubble("This is usecase 4", Set(UsecaseInclude("I extend usecase 4")))
     val usecaseBubble5 = UsecaseBubble("This is usecase 5", Set.empty)
-    val usecaseBubble6 = UsecaseBubble("This is usecase 6", Set(UsecaseInclude("I extends usecase 6"), UsecaseInclude("I also extends usecase 7")))
+    val usecaseBubble6 = UsecaseBubble("This is usecase 6", Set(UsecaseInclude("I_extends usecase_6_and_know"), UsecaseInclude("I also extends usecase 7")))
     val usecaseBubble7 = UsecaseBubble("This is usecase 7", Set.empty)
     val usecaseBubble8 = UsecaseBubble("This is usecase 8", Set.empty)
     val usecaseBubble9 = UsecaseBubble("This is usecase 9", Set.empty)
     val usecaseBubble10 = UsecaseBubble("This is usecase 10", Set.empty)
     val usecaseBubble11 = UsecaseBubble("This is usecase 11", Set.empty)
-    val usecaseBubble12 = UsecaseBubble("This is usecase 12", Set(UsecaseInclude("I extend usecase 4")))
+    val usecaseBubble12 = UsecaseBubble("This is usecase 12 1314", Set(UsecaseInclude("I extend usecase 4")))
 
     var set1 = new scala.collection.mutable.LinkedHashSet[UsecaseBubble]()
     set1 += usecaseBubble1
