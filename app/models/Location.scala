@@ -36,7 +36,12 @@ object Location{
     * @return
     */
   def getDiagramHeight(usecaseDiagram: UsecaseDiagram): Int
-    = getAllUsecaseBubblesSetSize(usecaseDiagram) * BubbleProperties.HEIGHT.getValue
+    = {
+    if (usecaseDiagram.actorsAndUsecases.keys.size > 1)
+      getAllUsecaseBubblesSetSize(usecaseDiagram) * BubbleProperties.HEIGHT.getValue
+    else
+      BubbleProperties.HEIGHT.getValue * 3
+  }
 
 
   /**

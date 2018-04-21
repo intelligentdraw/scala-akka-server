@@ -5,7 +5,7 @@ import scala.collection.mutable.ListBuffer
 
 case class UsecaseDiagram(title:String, actorsAndUsecases: scala.collection.mutable.Map[UsecaseActor, scala.collection.mutable.Set[UsecaseBubble]])
 
-case class UsecaseDiagrams(usecaseDiags: Map[String, UsecaseDiagram])
+case class UsecaseDiagrams(usecaseDiags: scala.collection.mutable.Map[String, UsecaseDiagram])
 
 object UsecaseDiagrams{
 
@@ -52,38 +52,21 @@ object UsecaseDiagrams{
     set3 += usecaseBubble12
 
 
-    UsecaseDiagrams(
-      Map(
-        "aaaaa"-> UsecaseDiagram("Usecase diagram One", scala.collection.mutable.Map(
-          UsecaseActor("Director")->set1,
-          UsecaseActor("Office Worker")->set2,
-          UsecaseActor("Customer")->set2,
-          UsecaseActor("Factory Worker")->set3)),
-        "bbbbb"-> UsecaseDiagram("Usecase diagram Two", scala.collection.mutable.Map(
-          UsecaseActor("Managing Director")->set2,
-          UsecaseActor("Acting Director")->set3)),
-        "ccccc"-> UsecaseDiagram("Usecase diagram three", scala.collection.mutable.Map(
-          UsecaseActor("Managing Director")->set2,
-          UsecaseActor("Acting Director")->set3)),
-        "ddddd"-> UsecaseDiagram("Usecase diagram and four", scala.collection.mutable.Map(
-          UsecaseActor("Manager")->set3)),
+    var rootMap = scala.collection.mutable.Map.empty[String, UsecaseDiagram]
 
-        "eeeee"-> UsecaseDiagram("Usecase diagram Five five", scala.collection.mutable.Map(
-          UsecaseActor("Deputy Director")->set1,
-          UsecaseActor("Office Worker")->set2,
-          UsecaseActor("Customer 2")->set2,
-          UsecaseActor("Factory Worker")->set3)),
-        "fffff"-> UsecaseDiagram("Usecase diagram six six six", scala.collection.mutable.Map(
-          UsecaseActor("Director")->set1,
-          UsecaseActor("Venue Managing Director")->set2,
-          UsecaseActor("Acting Director")->set3)),
-        "ggggg"-> UsecaseDiagram("Usecase diagram seven", scala.collection.mutable.Map(
-          UsecaseActor("Director")->set1,
-          UsecaseActor("Double Managing Director")->set2,
-          UsecaseActor("Acting Director")->set3)),
-        "hhhhh"-> UsecaseDiagram("Usecase diagram and eight eight eight", scala.collection.mutable.Map(
-          UsecaseActor("Director")->set1,
-          UsecaseActor("Ast Manager")->set3))));
+
+    rootMap ("aaaaa") = UsecaseDiagram("Usecase diagram One", scala.collection.mutable.Map(
+        UsecaseActor("Director")->set1,
+      UsecaseActor("Office Worker")->set2,
+      UsecaseActor("Customer")->set2,
+      UsecaseActor("Factory Worker")->set3))
+
+
+    rootMap ("bbbbb") = UsecaseDiagram("Usecase diagram Two", scala.collection.mutable.Map(
+      UsecaseActor("Director")->set2,
+      UsecaseActor("Managing Director")->set3))
+
+    UsecaseDiagrams(rootMap)
 
   }
 }

@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream
 import javax.inject.{Inject, Singleton}
 
 import helpers.GraphicsHelper
+import models.Drawing.drawingsMap
 import models._
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -19,7 +20,20 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
   var usecaseDiagrams = UsecaseDiagrams.createForTesting();
 
   def getDrawings = Action{
-    val drawings = Drawing.findAll
+
+    var drawingsMap =  new scala.collection.mutable.LinkedHashMap[String, Drawing]
+
+
+    for ((key, usecaseDiag) <- usecaseDiagrams.usecaseDiags){
+      val drawing = Drawing(key, usecaseDiag.title, "James Brown", "NPR", "Accounts", "Use Case", "12-Mar-17", "12-Mar-17")
+      drawingsMap += (key -> drawing)
+    }
+
+    implicit val format = Json.format[Drawing]
+
+    val drawings = drawingsMap.values.toList.sortBy(_.title)
+
+    //val drawings = Drawing.findAll
     Ok(Json.toJson(drawings))
   }
 
@@ -173,4 +187,41 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
     }
 
   }
+
+  def createNewUsecaseDiag = Action{ implicit request =>
+
+    val usecaseData = request.body.asJson
+    println(s"Json: $usecaseData")
+
+    val usecaseDiagNameOption = (usecaseData.get \ "usecaseDiagName").asOpt[String]
+    val usecaseNameOption = (usecaseData.get \ "usecaseName").asOpt[String]
+    val actorNameOption = (usecaseData.get \ "actorName").asOpt[String]
+
+    val usecaseBubble = UsecaseBubble(usecaseNameOption.get, Set.empty)
+
+    val set = new scala.collection.mutable.LinkedHashSet[UsecaseBubble]()
+    set += usecaseBubble
+
+    val diag = new UsecaseDiagram(usecaseDiagNameOption.get, scala.collection.mutable.Map(
+      UsecaseActor(actorNameOption.get)->set))
+
+    println("1. sizee: " + usecaseDiagrams.usecaseDiags.size)
+    println("name: " + usecaseDiagNameOption.get)
+    usecaseDiagrams.usecaseDiags(usecaseDiagNameOption.get) = diag
+    println("2. sizee: " + usecaseDiagrams.usecaseDiags.size)
+
+    Ok("{}")
+  }
+
+//  def sayHello = Action { request =>
+//    request.body.asJson.map { json =>
+//      (json \ "name").asOpt[String].map { name =>
+//        Ok("Hello " + name)
+//      }.getOrElse {
+//        BadRequest("Missing parameter [name]")
+//      }
+//    }.getOrElse {
+//      BadRequest("Expecting Json data")
+//    }
+//  }
 }
