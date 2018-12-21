@@ -3,7 +3,7 @@ import play.api.libs.json.Json
 
 import scala.collection.mutable.ListBuffer
 
-case class UsecaseDiagram(title:String, actorsAndUsecases: scala.collection.mutable.Map[UsecaseActor, scala.collection.mutable.Set[UsecaseBubble]])
+case class UsecaseDiagram(diagId:String, title:String, actorsAndUsecases: scala.collection.mutable.Map[UsecaseActor, scala.collection.mutable.Set[UsecaseBubble]])
 
 case class UsecaseDiagrams(usecaseDiags: scala.collection.mutable.Map[String, UsecaseDiagram])
 
@@ -55,18 +55,32 @@ object UsecaseDiagrams{
     var rootMap = scala.collection.mutable.Map.empty[String, UsecaseDiagram]
 
 
-    rootMap ("aaaaa") = UsecaseDiagram("Usecase diagram One", scala.collection.mutable.Map(
+    rootMap ("qwqwqw") = UsecaseDiagram("qwqwqw", "Usecase diagram One", scala.collection.mutable.Map(
         UsecaseActor("Director")->set1,
       UsecaseActor("Office Worker")->set2,
       UsecaseActor("Customer")->set2,
       UsecaseActor("Factory Worker")->set3))
 
 
-    rootMap ("bbbbb") = UsecaseDiagram("Usecase diagram Two", scala.collection.mutable.Map(
+    rootMap ("asasas") = UsecaseDiagram("asasas", "Usecase diagram Two", scala.collection.mutable.Map(
       UsecaseActor("Director")->set2,
       UsecaseActor("Managing Director")->set3))
 
     UsecaseDiagrams(rootMap)
 
+  }
+
+  def findAllUsecasesByActorNameAsString(diagramId:String, actorName:String, diagrams: UsecaseDiagrams):  String={
+    var values = ""
+    diagrams.usecaseDiags(diagramId).actorsAndUsecases.foreach(turple =>{
+      if (turple._1.name.equals(actorName)){
+        println("Name2: " + turple._1)
+        turple._2.foreach(bubble =>{
+          values += bubble + ","
+        })
+      }
+    })
+    println("values: " + values)
+    values
   }
 }

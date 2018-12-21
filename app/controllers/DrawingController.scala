@@ -68,6 +68,8 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
       usecaseElements += Map(
         "name" -> actorLocation.desc,
         "coords"->coords,
+        "type"->"actor",
+        "usecases"-> UsecaseDiagrams.findAllUsecasesByActorNameAsString(id, actorLocation.desc, usecaseDiagrams),
         "shape" ->"rect")
     })
 
@@ -80,6 +82,7 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
       usecaseElements += Map(
         "name" -> bubbleLocation.desc,
         "coords"->coords,
+        "type"->"bubble",
         "shape" ->"rect")
     })
 
@@ -93,6 +96,7 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
       usecaseElements += Map(
         "name" -> includeLocation.desc,
         "coords"->coords,
+        "type"->"include",
         "shape" ->"rect")
     })
 
@@ -202,15 +206,14 @@ class DrawingController  @Inject()(cc: ControllerComponents) extends AbstractCon
     val set = new scala.collection.mutable.LinkedHashSet[UsecaseBubble]()
     set += usecaseBubble
 
-    val diag = new UsecaseDiagram(usecaseDiagNameOption.get, scala.collection.mutable.Map(
+    val key = scala.util.Random.alphanumeric take 10 mkString
+
+    val diag = new UsecaseDiagram(key, usecaseDiagNameOption.get, scala.collection.mutable.Map(
       UsecaseActor(actorNameOption.get)->set))
 
-    println("1. sizee: " + usecaseDiagrams.usecaseDiags.size)
-    println("name: " + usecaseDiagNameOption.get)
-    usecaseDiagrams.usecaseDiags(usecaseDiagNameOption.get) = diag
-    println("2. sizee: " + usecaseDiagrams.usecaseDiags.size)
 
-    Ok("{}")
+    usecaseDiagrams.usecaseDiags(key) = diag
+    Ok(Json.obj("identifier" ->key))
   }
 
 //  def sayHello = Action { request =>
